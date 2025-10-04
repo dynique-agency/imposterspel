@@ -520,6 +520,11 @@ function initIndexPage() {
 
     // Handle player count input with validation
     customPlayerCount.addEventListener('input', function() {
+        // Force mobile styling
+        this.style.background = 'var(--glass-bg)';
+        this.style.color = 'var(--text-primary)';
+        this.style.webkitTextFillColor = 'var(--text-primary)';
+        
         const value = parseInt(this.value);
         const isValid = InputValidator.validate(this, [
             InputValidator.rules.required,
@@ -532,6 +537,19 @@ function initIndexPage() {
             AutoSave.save();
         }
     });
+    
+    // Additional mobile fixes
+    customPlayerCount.addEventListener('focus', function() {
+        this.style.background = 'var(--glass-bg)';
+        this.style.color = 'var(--text-primary)';
+        this.style.webkitTextFillColor = 'var(--text-primary)';
+    });
+    
+    customPlayerCount.addEventListener('blur', function() {
+        this.style.background = 'var(--glass-bg)';
+        this.style.color = 'var(--text-primary)';
+        this.style.webkitTextFillColor = 'var(--text-primary)';
+    });
 
     // Update imposter max based on player count
     function updateImposterMax() {
@@ -543,6 +561,11 @@ function initIndexPage() {
     }
 
     imposterCount.addEventListener('input', function() {
+        // Force mobile styling
+        this.style.background = 'var(--glass-bg)';
+        this.style.color = 'var(--text-primary)';
+        this.style.webkitTextFillColor = 'var(--text-primary)';
+        
         const value = parseInt(this.value);
         const maxImposters = Math.floor(gameState.playerCount / 2);
         const isValid = InputValidator.validate(this, [
@@ -554,6 +577,19 @@ function initIndexPage() {
             gameState.imposterCount = value;
             AutoSave.save();
         }
+    });
+    
+    // Additional mobile fixes for imposter count
+    imposterCount.addEventListener('focus', function() {
+        this.style.background = 'var(--glass-bg)';
+        this.style.color = 'var(--text-primary)';
+        this.style.webkitTextFillColor = 'var(--text-primary)';
+    });
+    
+    imposterCount.addEventListener('blur', function() {
+        this.style.background = 'var(--glass-bg)';
+        this.style.color = 'var(--text-primary)';
+        this.style.webkitTextFillColor = 'var(--text-primary)';
     });
 
     // Start game button
@@ -623,6 +659,11 @@ function initPlayerNamesPage() {
         input.required = true;
         
         input.addEventListener('input', function() {
+            // Force mobile styling
+            this.style.background = 'var(--glass-bg)';
+            this.style.color = 'var(--text-primary)';
+            this.style.webkitTextFillColor = 'var(--text-primary)';
+            
             // Validate individual input
             InputValidator.validate(this, [
                 InputValidator.rules.required,
@@ -632,6 +673,19 @@ function initPlayerNamesPage() {
             
             checkAllNamesFilled();
             AutoSave.save();
+        });
+        
+        // Additional mobile fixes for player name inputs
+        input.addEventListener('focus', function() {
+            this.style.background = 'var(--glass-bg)';
+            this.style.color = 'var(--text-primary)';
+            this.style.webkitTextFillColor = 'var(--text-primary)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.background = 'var(--glass-bg)';
+            this.style.color = 'var(--text-primary)';
+            this.style.webkitTextFillColor = 'var(--text-primary)';
         });
         
         inputGroup.appendChild(label);
