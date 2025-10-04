@@ -378,66 +378,28 @@ function getRandomWord(knowledgeLevel) {
     return wordList[Math.floor(Math.random() * wordList.length)];
 }
 
-// Loading Screen Manager
-const LoadingScreen = {
-    element: null,
-    progressText: null,
-    progressFill: null,
-    
-    init: function() {
-        this.element = document.getElementById('loading-screen');
-        this.progressText = document.querySelector('.progress-text');
-        this.progressFill = document.querySelector('.progress-fill');
-        
-        if (!this.element) {
-            console.warn('Loading screen element not found');
-            return;
-        }
-        
-        this.updateProgress('Initialiseren...', 0);
-    },
-    
-    updateProgress: function(text, percentage) {
-        if (this.progressText) {
-            this.progressText.textContent = text;
-        }
-        
-        if (this.progressFill) {
-            this.progressFill.style.width = `${percentage}%`;
-        }
-    },
-    
-    hide: function() {
-        if (this.element) {
-            this.element.classList.add('hidden');
-            setTimeout(() => {
-                if (this.element) {
-                    this.element.remove();
-                }
-            }, 500);
-        }
-    }
-};
-
 // Initialize the game based on current page
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        // Initialize loading screen
-        LoadingScreen.init();
+        // Show loading overlay
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.innerHTML = `
+            <div class="spinner"></div>
+            <p style="color: var(--text-primary); font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; margin-top: 20px;">Loading...</p>
+        `;
+        document.body.appendChild(loadingOverlay);
         
         // Load words database
-        LoadingScreen.updateProgress('Woorden laden...', 25);
         await loadWordsDatabase();
         
         // Load game state if available
-        LoadingScreen.updateProgress('Spelstatus laden...', 50);
         const savedState = ErrorHandler.safeLocalStorage.get('gameState');
         if (savedState) {
             gameState = { ...gameState, ...savedState };
         }
         
         // Validate game state
-        LoadingScreen.updateProgress('Validatie...', 75);
         if (!ErrorHandler.validateGameState()) {
             ErrorHandler.showError('Invalid game state detected. Resetting to default settings.');
             gameState = {
@@ -457,18 +419,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             };
         }
         
+        // Remove loading overlay
+        loadingOverlay.remove();
+        
         // Initialize UX systems
-        LoadingScreen.updateProgress('Systeem initialiseren...', 90);
         AutoSave.init();
         KeyboardShortcuts.init();
-        
-        // Final loading step
-        LoadingScreen.updateProgress('Klaar!', 100);
-        
-        // Wait a moment then hide loading screen
-        setTimeout(() => {
-            LoadingScreen.hide();
-        }, 500);
         
         // Initialize page
         const currentPage = window.location.pathname.split('/').pop();
@@ -508,8 +464,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Critical error during initialization:', error);
         ErrorHandler.showError('Critical error occurred. Please refresh the page.');
         
-        // Hide loading screen on error
-        LoadingScreen.hide();
+        // Remove loading overlay if it exists
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.remove();
+        }
     }
 });
 
@@ -520,11 +479,6 @@ function initIndexPage() {
 
     // Handle player count input with validation
     customPlayerCount.addEventListener('input', function() {
-        // Force mobile styling
-        this.style.background = 'var(--glass-bg)';
-        this.style.color = 'var(--text-primary)';
-        this.style.webkitTextFillColor = 'var(--text-primary)';
-        
         const value = parseInt(this.value);
         const isValid = InputValidator.validate(this, [
             InputValidator.rules.required,
@@ -537,19 +491,6 @@ function initIndexPage() {
             AutoSave.save();
         }
     });
-    
-    // Additional mobile fixes
-    customPlayerCount.addEventListener('focus', function() {
-        this.style.background = 'var(--glass-bg)';
-        this.style.color = 'var(--text-primary)';
-        this.style.webkitTextFillColor = 'var(--text-primary)';
-    });
-    
-    customPlayerCount.addEventListener('blur', function() {
-        this.style.background = 'var(--glass-bg)';
-        this.style.color = 'var(--text-primary)';
-        this.style.webkitTextFillColor = 'var(--text-primary)';
-    });
 
     // Update imposter max based on player count
     function updateImposterMax() {
@@ -561,11 +502,6 @@ function initIndexPage() {
     }
 
     imposterCount.addEventListener('input', function() {
-        // Force mobile styling
-        this.style.background = 'var(--glass-bg)';
-        this.style.color = 'var(--text-primary)';
-        this.style.webkitTextFillColor = 'var(--text-primary)';
-        
         const value = parseInt(this.value);
         const maxImposters = Math.floor(gameState.playerCount / 2);
         const isValid = InputValidator.validate(this, [
@@ -577,19 +513,6 @@ function initIndexPage() {
             gameState.imposterCount = value;
             AutoSave.save();
         }
-    });
-    
-    // Additional mobile fixes for imposter count
-    imposterCount.addEventListener('focus', function() {
-        this.style.background = 'var(--glass-bg)';
-        this.style.color = 'var(--text-primary)';
-        this.style.webkitTextFillColor = 'var(--text-primary)';
-    });
-    
-    imposterCount.addEventListener('blur', function() {
-        this.style.background = 'var(--glass-bg)';
-        this.style.color = 'var(--text-primary)';
-        this.style.webkitTextFillColor = 'var(--text-primary)';
     });
 
     // Start game button
@@ -659,11 +582,6 @@ function initPlayerNamesPage() {
         input.required = true;
         
         input.addEventListener('input', function() {
-            // Force mobile styling
-            this.style.background = 'var(--glass-bg)';
-            this.style.color = 'var(--text-primary)';
-            this.style.webkitTextFillColor = 'var(--text-primary)';
-            
             // Validate individual input
             InputValidator.validate(this, [
                 InputValidator.rules.required,
@@ -673,19 +591,6 @@ function initPlayerNamesPage() {
             
             checkAllNamesFilled();
             AutoSave.save();
-        });
-        
-        // Additional mobile fixes for player name inputs
-        input.addEventListener('focus', function() {
-            this.style.background = 'var(--glass-bg)';
-            this.style.color = 'var(--text-primary)';
-            this.style.webkitTextFillColor = 'var(--text-primary)';
-        });
-        
-        input.addEventListener('blur', function() {
-            this.style.background = 'var(--glass-bg)';
-            this.style.color = 'var(--text-primary)';
-            this.style.webkitTextFillColor = 'var(--text-primary)';
         });
         
         inputGroup.appendChild(label);
@@ -721,29 +626,21 @@ function initLoadingPage() {
         gameState = JSON.parse(gameStateData);
     }
 
-    // Initialize loading screen for this page
-    LoadingScreen.init();
-    
-    // Simulate role assignment process
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        progress += 20;
-        if (progress <= 100) {
-            LoadingScreen.updateProgress(`Rollen toewijzen... ${progress}%`, progress);
-        }
-    }, 200);
+    const countdown = document.getElementById('countdown');
+    let timeLeft = 5;
 
     // Assign roles randomly
-    setTimeout(() => {
-        assignRoles();
-        clearInterval(progressInterval);
-        LoadingScreen.updateProgress('Rollen toegewezen!', 100);
+    assignRoles();
+
+    const timer = setInterval(function() {
+        timeLeft--;
+        countdown.textContent = timeLeft;
         
-        // Save and navigate after a moment
-        setTimeout(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timer);
             localStorage.setItem('gameState', JSON.stringify(gameState));
             window.location.href = 'role-reveal.html';
-        }, 1000);
+        }
     }, 1000);
 }
 
