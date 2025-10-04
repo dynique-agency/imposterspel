@@ -749,11 +749,13 @@ function initIndexPage() {
     testFileExistence();
     
     // Add a simple test click to verify the button works
+    console.log('Adding test click listener...');
     startButton.addEventListener('click', function() {
         console.log('TEST: Button click detected!');
     }, { once: true });
     
     // Also try with a different event listener approach
+    console.log('Setting onclick handler...');
     startButton.onclick = function(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -764,6 +766,22 @@ function initIndexPage() {
         // Call the main function directly
         handleStartGame();
     };
+    
+    // Test if button is actually clickable
+    console.log('Button element:', startButton);
+    console.log('Button tagName:', startButton.tagName);
+    console.log('Button type:', startButton.type);
+    console.log('Button disabled:', startButton.disabled);
+    console.log('Button style pointer-events:', window.getComputedStyle(startButton).pointerEvents);
+    console.log('Button style display:', window.getComputedStyle(startButton).display);
+    console.log('Button style visibility:', window.getComputedStyle(startButton).visibility);
+    
+    // Test manual click
+    console.log('Testing manual click...');
+    setTimeout(() => {
+        console.log('Attempting manual click...');
+        startButton.click();
+    }, 1000);
     
     function handleStartGame() {
         console.log('handleStartGame called');
