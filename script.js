@@ -404,8 +404,8 @@ function getRandomWord(knowledgeLevel) {
 }
 
 // Initialize the game based on current page
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 DOMContentLoaded event fired');
+function initializeGame() {
+    console.log('🚀 initializeGame called');
     console.log('Current URL:', window.location.href);
     console.log('User Agent:', navigator.userAgent);
     
@@ -424,9 +424,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Load words database
         console.log('📚 Loading words database...');
-        await loadWordsDatabase();
-        console.log('✅ Words database loaded');
+        loadWordsDatabase().then(() => {
+            console.log('✅ Words database loaded');
+            continueInitialization();
+        }).catch(error => {
+            console.error('❌ Failed to load words database:', error);
+            continueInitialization();
+        });
         
+    } catch (error) {
+        console.error('💥 Error in initializeGame:', error);
+        ErrorHandler.showError('Critical error occurred. Please refresh the page.');
+    }
+}
+
+async function continueInitialization() {
+    try {
         // Load game state if available
         console.log('💾 Loading game state...');
         const savedState = ErrorHandler.safeLocalStorage.get('gameState');
@@ -461,7 +474,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.log('✅ Game state validated');
         
         // Remove loading overlay
-        loadingOverlay.remove();
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.remove();
+        }
         console.log('✅ Loading overlay removed');
         
         // Initialize UX systems
@@ -517,15 +533,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.log('🎉 Initialization completed successfully!');
         
     } catch (error) {
-        console.error('💥 Error initializing game:', error);
-        console.error('Error stack:', error.stack);
+        console.error('💥 Error in continueInitialization:', error);
         ErrorHandler.showError('Critical error occurred. Please refresh the page.');
-        
-        // Remove loading overlay if it exists
-        const loadingOverlay = document.querySelector('.loading-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.remove();
-        }
+    }
+}
+
+// Multiple initialization methods for Cloudflare compatibility
+document.addEventListener('DOMContentLoaded', initializeGame);
+
+// Fallback for when DOMContentLoaded doesn't fire
+if (document.readyState === 'loading') {
+    console.log('Document still loading, waiting for DOMContentLoaded...');
+} else {
+    console.log('Document already loaded, initializing immediately...');
+    setTimeout(initializeGame, 100);
+}
+
+// Additional fallback
+window.addEventListener('load', function() {
+    if (!window.gameInitialized) {
+        console.log('DOMContentLoaded fallback triggered');
+        initializeGame();
     }
 });
 
@@ -965,9 +993,16 @@ function startGameDirect() {
         localStorage.setItem('gameState', JSON.stringify(gameStateData));
         console.log('Game state saved to localStorage');
         
-        // Navigate directly
-        console.log('Navigating to player-names.html');
-        window.location.href = 'player-names.html';
+        // Navigate using form submission (more reliable on Cloudflare)
+        console.log('Navigating to player-names.html using form submission');
+        
+        // Create and submit a form
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = 'player-names.html';
+        form.style.display = 'none';
+        document.body.appendChild(form);
+        form.submit();
         
     } catch (error) {
         console.error('Error in startGameDirect:', error);

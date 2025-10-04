@@ -1,0 +1,14 @@
+/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/player-names.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/script.js
+  Cache-Control: no-cache, no-store, must-revalidate
