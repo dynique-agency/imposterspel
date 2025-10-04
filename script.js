@@ -405,7 +405,13 @@ function getRandomWord(knowledgeLevel) {
 
 // Initialize the game based on current page
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 DOMContentLoaded event fired');
+    console.log('Current URL:', window.location.href);
+    console.log('User Agent:', navigator.userAgent);
+    
     try {
+        console.log('✅ Starting initialization...');
+        
         // Show loading overlay
         const loadingOverlay = document.createElement('div');
         loadingOverlay.className = 'loading-overlay';
@@ -414,18 +420,27 @@ document.addEventListener('DOMContentLoaded', async function() {
             <p style="color: var(--text-primary); font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; margin-top: 20px;">Loading...</p>
         `;
         document.body.appendChild(loadingOverlay);
+        console.log('✅ Loading overlay created');
         
         // Load words database
+        console.log('📚 Loading words database...');
         await loadWordsDatabase();
+        console.log('✅ Words database loaded');
         
         // Load game state if available
+        console.log('💾 Loading game state...');
         const savedState = ErrorHandler.safeLocalStorage.get('gameState');
         if (savedState) {
             gameState = { ...gameState, ...savedState };
+            console.log('✅ Game state loaded:', gameState);
+        } else {
+            console.log('ℹ️ No saved game state found');
         }
         
         // Validate game state
+        console.log('🔍 Validating game state...');
         if (!ErrorHandler.validateGameState()) {
+            console.log('⚠️ Invalid game state detected, resetting...');
             ErrorHandler.showError('Invalid game state detected. Resetting to default settings.');
             gameState = {
                 playerCount: 5,
@@ -443,50 +458,67 @@ document.addEventListener('DOMContentLoaded', async function() {
                 winner: null
             };
         }
+        console.log('✅ Game state validated');
         
         // Remove loading overlay
         loadingOverlay.remove();
+        console.log('✅ Loading overlay removed');
         
         // Initialize UX systems
+        console.log('🎨 Initializing UX systems...');
         AutoSave.init();
         KeyboardShortcuts.init();
+        console.log('✅ UX systems initialized');
         
         // Initialize page
         const currentPage = window.location.pathname.split('/').pop();
+        console.log('📄 Current page:', currentPage);
         
         switch(currentPage) {
             case 'index.html':
             case '':
+                console.log('🏠 Initializing index page...');
                 initIndexPage();
                 break;
             case 'player-names.html':
+                console.log('👥 Initializing player names page...');
                 initPlayerNamesPage();
                 break;
             case 'loading.html':
+                console.log('⏳ Initializing loading page...');
                 initLoadingPage();
                 break;
             case 'role-reveal.html':
+                console.log('🎭 Initializing role reveal page...');
                 initRoleRevealPage();
                 break;
             case 'game-rounds.html':
+                console.log('🎮 Initializing game rounds page...');
                 initGameRoundsPage();
                 break;
             case 'voting.html':
+                console.log('🗳️ Initializing voting page...');
                 initVotingPage();
                 break;
             case 'vote-result.html':
+                console.log('📊 Initializing vote result page...');
                 initVoteResultPage();
                 break;
             case 'game-result.html':
+                console.log('🏆 Initializing game result page...');
                 initGameResultPage();
                 break;
             default:
+                console.log('❓ Unknown page:', currentPage);
                 ErrorHandler.showError('Unknown page. Redirecting to home.');
                 window.location.href = 'index.html';
         }
         
+        console.log('🎉 Initialization completed successfully!');
+        
     } catch (error) {
-        console.error('Critical error during initialization:', error);
+        console.error('💥 Error initializing game:', error);
+        console.error('Error stack:', error.stack);
         ErrorHandler.showError('Critical error occurred. Please refresh the page.');
         
         // Remove loading overlay if it exists
