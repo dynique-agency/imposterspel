@@ -776,12 +776,6 @@ function initIndexPage() {
     console.log('Button style display:', window.getComputedStyle(startButton).display);
     console.log('Button style visibility:', window.getComputedStyle(startButton).visibility);
     
-    // Test manual click
-    console.log('Testing manual click...');
-    setTimeout(() => {
-        console.log('Attempting manual click...');
-        startButton.click();
-    }, 1000);
     
     function handleStartGame() {
         console.log('handleStartGame called');
@@ -924,6 +918,65 @@ function initIndexPage() {
         }
     }
 }
+
+// Direct function approach - bypasses all event listener issues
+function startGameDirect() {
+    console.log('startGameDirect called');
+    
+    try {
+        // Get values directly from DOM
+        const playerCount = parseInt(document.getElementById('customPlayerCount').value) || 5;
+        const imposterCount = parseInt(document.getElementById('imposterCount').value) || 1;
+        const imposterKnowledge = document.getElementById('imposterKnowledge').value || 'nothing';
+        
+        console.log('Values:', { playerCount, imposterCount, imposterKnowledge });
+        
+        // Validate
+        if (playerCount < 3 || playerCount > 20) {
+            alert('Aantal spelers moet tussen 3 en 20 zijn.');
+            return;
+        }
+        
+        if (imposterCount < 1 || imposterCount > Math.floor(playerCount / 2)) {
+            alert('Aantal imposters moet tussen 1 en de helft van het aantal spelers zijn.');
+            return;
+        }
+        
+        // Create game state
+        const gameStateData = {
+            playerCount: playerCount,
+            imposterCount: imposterCount,
+            imposterKnowledge: imposterKnowledge,
+            players: [],
+            roles: [],
+            originalPlayers: [],
+            originalRoles: [],
+            currentRound: 1,
+            currentPlayerIndex: 0,
+            gameWord: getRandomWord(imposterKnowledge),
+            votes: {},
+            gameEnded: false,
+            winner: null
+        };
+        
+        console.log('Game state created:', gameStateData);
+        
+        // Save to localStorage
+        localStorage.setItem('gameState', JSON.stringify(gameStateData));
+        console.log('Game state saved to localStorage');
+        
+        // Navigate directly
+        console.log('Navigating to player-names.html');
+        window.location.href = 'player-names.html';
+        
+    } catch (error) {
+        console.error('Error in startGameDirect:', error);
+        alert('Er is een fout opgetreden. Probeer het opnieuw.');
+    }
+}
+
+// Make function globally available
+window.startGameDirect = startGameDirect;
 
 function initPlayerNamesPage() {
     const gameStateData = localStorage.getItem('gameState');
