@@ -312,6 +312,31 @@ const InputValidator = {
     }
 };
 
+// Test file existence
+async function testFileExistence() {
+    const requiredFiles = [
+        'player-names.html',
+        'loading.html',
+        'role-reveal.html',
+        'game-rounds.html',
+        'voting.html',
+        'vote-result.html',
+        'game-result.html',
+        'woorden.json'
+    ];
+    
+    console.log('Testing file existence...');
+    
+    for (const file of requiredFiles) {
+        try {
+            const response = await fetch(file, { method: 'HEAD' });
+            console.log(`${file}: ${response.ok ? '✅ EXISTS' : '❌ NOT FOUND'} (${response.status})`);
+        } catch (error) {
+            console.log(`${file}: ❌ ERROR - ${error.message}`);
+        }
+    }
+}
+
 // Load words database
 async function loadWordsDatabase() {
     try {
@@ -535,8 +560,10 @@ function initIndexPage() {
     }
 
     // Start game button
-    startButton.addEventListener('click', function() {
+    console.log('Adding click listener to start button');
+    startButton.addEventListener('click', function(event) {
         console.log('Start game button clicked');
+        console.log('Event:', event);
         console.log('Current gameState:', gameState);
         
         try {
@@ -580,17 +607,42 @@ function initIndexPage() {
             console.log('Navigating to player-names.html...');
             
             // Navigate to next page with fallback
+            console.log('Attempting navigation to player-names.html');
+            console.log('Current URL:', window.location.href);
+            
             try {
-                window.location.href = 'player-names.html';
+                // Try direct navigation first
+                window.location.href = './player-names.html';
+                
+                // Check if navigation actually happened after a delay
+                setTimeout(() => {
+                    console.log('Checking navigation result...');
+                    console.log('Current URL after navigation:', window.location.href);
+                    
+                    if (window.location.href.includes('index') || window.location.href.includes('player-names') === false) {
+                        console.log('Navigation failed, trying alternative methods');
+                        
+                        // Try alternative navigation methods
+                        try {
+                            window.location.assign('./player-names.html');
+                        } catch (e1) {
+                            console.error('Assign failed:', e1);
+                            try {
+                                window.location.replace('./player-names.html');
+                            } catch (e2) {
+                                console.error('Replace failed:', e2);
+                                // Last resort: create a link and click it
+                                const link = document.createElement('a');
+                                link.href = './player-names.html';
+                                link.click();
+                            }
+                        }
+                    }
+                }, 1000);
+                
             } catch (navError) {
                 console.error('Navigation error:', navError);
-                // Fallback navigation methods
-                window.location.assign('player-names.html');
-                setTimeout(() => {
-                    if (window.location.pathname.includes('index')) {
-                        window.location.replace('player-names.html');
-                    }
-                }, 100);
+                ErrorHandler.showError('Navigation failed. Please check if all files are uploaded correctly.');
             }
             
         } catch (error) {
@@ -600,6 +652,13 @@ function initIndexPage() {
     });
 
     updateImposterMax();
+    
+    // Test if button is clickable
+    console.log('Button disabled?', startButton.disabled);
+    console.log('Button style:', window.getComputedStyle(startButton));
+    
+    // Test if all required files exist
+    testFileExistence();
 }
 
 function initPlayerNamesPage() {
