@@ -606,43 +606,95 @@ function initIndexPage() {
             console.log('Game state saved successfully');
             console.log('Navigating to player-names.html...');
             
-            // Navigate to next page with fallback
+            // Navigate to next page with server-side redirect detection
             console.log('Attempting navigation to player-names.html');
             console.log('Current URL:', window.location.href);
+            
+            // Store current URL to detect redirects
+            const originalUrl = window.location.href;
             
             try {
                 // Try direct navigation first
                 window.location.href = './player-names.html';
                 
-                // Check if navigation actually happened after a delay
-                setTimeout(() => {
-                    console.log('Checking navigation result...');
-                    console.log('Current URL after navigation:', window.location.href);
+                // Monitor for redirects
+                let redirectCheckCount = 0;
+                const maxRedirectChecks = 10;
+                
+                const checkForRedirect = () => {
+                    redirectCheckCount++;
+                    console.log(`Redirect check ${redirectCheckCount}/${maxRedirectChecks}`);
+                    console.log('Current URL:', window.location.href);
                     
-                    if (window.location.href.includes('index') || window.location.href.includes('player-names') === false) {
-                        console.log('Navigation failed, trying alternative methods');
+                    if (window.location.href === originalUrl || window.location.href.includes('index')) {
+                        console.log('🚨 REDIRECT DETECTED! Server is redirecting back to index');
                         
-                        // Try alternative navigation methods
-                        try {
-                            window.location.assign('./player-names.html');
-                        } catch (e1) {
-                            console.error('Assign failed:', e1);
-                            try {
-                                window.location.replace('./player-names.html');
-                            } catch (e2) {
-                                console.error('Replace failed:', e2);
-                                // Last resort: create a link and click it
-                                const link = document.createElement('a');
-                                link.href = './player-names.html';
-                                link.click();
-                            }
+                        if (redirectCheckCount < maxRedirectChecks) {
+                            setTimeout(checkForRedirect, 500);
+                        } else {
+                            console.log('❌ Redirect loop detected. Trying alternative approach...');
+                            handleRedirectLoop();
                         }
+                    } else if (window.location.href.includes('player-names')) {
+                        console.log('✅ Successfully navigated to player-names.html');
+                    } else {
+                        console.log('⚠️ Navigated to unexpected page:', window.location.href);
+                        setTimeout(checkForRedirect, 500);
                     }
-                }, 1000);
+                };
+                
+                // Start monitoring for redirects
+                setTimeout(checkForRedirect, 100);
                 
             } catch (navError) {
                 console.error('Navigation error:', navError);
                 ErrorHandler.showError('Navigation failed. Please check if all files are uploaded correctly.');
+            }
+            
+            function handleRedirectLoop() {
+                console.log('Handling redirect loop...');
+                
+                // Try different approaches
+                const approaches = [
+                    () => {
+                        console.log('Trying absolute URL...');
+                        const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+                        window.location.href = baseUrl + 'player-names.html';
+                    },
+                    () => {
+                        console.log('Trying without ./ prefix...');
+                        window.location.href = 'player-names.html';
+                    },
+                    () => {
+                        console.log('Trying with full path...');
+                        const pathParts = window.location.pathname.split('/');
+                        pathParts[pathParts.length - 1] = 'player-names.html';
+                        window.location.href = pathParts.join('/');
+                    },
+                    () => {
+                        console.log('Trying form submission...');
+                        const form = document.createElement('form');
+                        form.method = 'GET';
+                        form.action = 'player-names.html';
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                ];
+                
+                let approachIndex = 0;
+                const tryNextApproach = () => {
+                    if (approachIndex < approaches.length) {
+                        console.log(`Trying approach ${approachIndex + 1}...`);
+                        approaches[approachIndex]();
+                        approachIndex++;
+                        setTimeout(tryNextApproach, 2000);
+                    } else {
+                        console.log('❌ All navigation approaches failed');
+                        ErrorHandler.showError('Server redirect detected. Please check server configuration or try refreshing the page.');
+                    }
+                };
+                
+                tryNextApproach();
             }
             
         } catch (error) {
@@ -659,6 +711,11 @@ function initIndexPage() {
     
     // Test if all required files exist
     testFileExistence();
+    
+    // Add a simple test click to verify the button works
+    startButton.addEventListener('click', function() {
+        console.log('TEST: Button click detected!');
+    }, { once: true });
 }
 
 function initPlayerNamesPage() {
