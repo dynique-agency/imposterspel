@@ -561,6 +561,10 @@ function initIndexPage() {
 
     // Start game button
     console.log('Adding click listener to start button');
+    
+    // Remove any existing listeners first
+    startButton.onclick = null;
+    
     startButton.addEventListener('click', function(event) {
         console.log('Start game button clicked');
         console.log('Event:', event);
@@ -716,6 +720,159 @@ function initIndexPage() {
     startButton.addEventListener('click', function() {
         console.log('TEST: Button click detected!');
     }, { once: true });
+    
+    // Also try with a different event listener approach
+    startButton.onclick = function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('ONCLICK: Button clicked via onclick!');
+        console.log('Event:', event);
+        console.log('Current gameState:', gameState);
+        
+        // Call the main function directly
+        handleStartGame();
+    };
+    
+    function handleStartGame() {
+        console.log('handleStartGame called');
+        console.log('Current gameState:', gameState);
+        
+        try {
+            // Validate input
+            if (gameState.playerCount < 3 || gameState.playerCount > 20) {
+                console.log('Invalid player count:', gameState.playerCount);
+                ErrorHandler.showError('Aantal spelers moet tussen 3 en 20 zijn.', document.querySelector('.game-settings'));
+                return;
+            }
+            
+            if (gameState.imposterCount < 1 || gameState.imposterCount > Math.floor(gameState.playerCount / 2)) {
+                console.log('Invalid imposter count:', gameState.imposterCount);
+                ErrorHandler.showError('Aantal imposters moet tussen 1 en de helft van het aantal spelers zijn.', document.querySelector('.game-settings'));
+                return;
+            }
+            
+            // Get imposter knowledge
+            const knowledgeSelect = document.getElementById('imposterKnowledge');
+            if (!knowledgeSelect) {
+                console.log('Knowledge select not found');
+                ErrorHandler.showError('Imposter knowledge selector not found.', document.querySelector('.game-settings'));
+                return;
+            }
+            
+            gameState.imposterKnowledge = knowledgeSelect.value;
+            console.log('Imposter knowledge set to:', gameState.imposterKnowledge);
+            
+            // Generate random word for this game
+            gameState.gameWord = getRandomWord(gameState.imposterKnowledge);
+            console.log('Generated word:', gameState.gameWord);
+            
+            // Save game state
+            console.log('Saving game state...');
+            if (!ErrorHandler.safeLocalStorage.set('gameState', gameState)) {
+                console.log('Failed to save game state');
+                ErrorHandler.showError('Failed to save game settings.', document.querySelector('.game-settings'));
+                return;
+            }
+            
+            console.log('Game state saved successfully');
+            console.log('Navigating to player-names.html...');
+            
+            // Navigate to next page with server-side redirect detection
+            console.log('Attempting navigation to player-names.html');
+            console.log('Current URL:', window.location.href);
+            
+            // Store current URL to detect redirects
+            const originalUrl = window.location.href;
+            
+            try {
+                // Try direct navigation first
+                window.location.href = './player-names.html';
+                
+                // Monitor for redirects
+                let redirectCheckCount = 0;
+                const maxRedirectChecks = 10;
+                
+                const checkForRedirect = () => {
+                    redirectCheckCount++;
+                    console.log(`Redirect check ${redirectCheckCount}/${maxRedirectChecks}`);
+                    console.log('Current URL:', window.location.href);
+                    
+                    if (window.location.href === originalUrl || window.location.href.includes('index')) {
+                        console.log('🚨 REDIRECT DETECTED! Server is redirecting back to index');
+                        
+                        if (redirectCheckCount < maxRedirectChecks) {
+                            setTimeout(checkForRedirect, 500);
+                        } else {
+                            console.log('❌ Redirect loop detected. Trying alternative approach...');
+                            handleRedirectLoop();
+                        }
+                    } else if (window.location.href.includes('player-names')) {
+                        console.log('✅ Successfully navigated to player-names.html');
+                    } else {
+                        console.log('⚠️ Navigated to unexpected page:', window.location.href);
+                        setTimeout(checkForRedirect, 500);
+                    }
+                };
+                
+                // Start monitoring for redirects
+                setTimeout(checkForRedirect, 100);
+                
+            } catch (navError) {
+                console.error('Navigation error:', navError);
+                ErrorHandler.showError('Navigation failed. Please check if all files are uploaded correctly.');
+            }
+            
+            function handleRedirectLoop() {
+                console.log('Handling redirect loop...');
+                
+                // Try different approaches
+                const approaches = [
+                    () => {
+                        console.log('Trying absolute URL...');
+                        const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+                        window.location.href = baseUrl + 'player-names.html';
+                    },
+                    () => {
+                        console.log('Trying without ./ prefix...');
+                        window.location.href = 'player-names.html';
+                    },
+                    () => {
+                        console.log('Trying with full path...');
+                        const pathParts = window.location.pathname.split('/');
+                        pathParts[pathParts.length - 1] = 'player-names.html';
+                        window.location.href = pathParts.join('/');
+                    },
+                    () => {
+                        console.log('Trying form submission...');
+                        const form = document.createElement('form');
+                        form.method = 'GET';
+                        form.action = 'player-names.html';
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                ];
+                
+                let approachIndex = 0;
+                const tryNextApproach = () => {
+                    if (approachIndex < approaches.length) {
+                        console.log(`Trying approach ${approachIndex + 1}...`);
+                        approaches[approachIndex]();
+                        approachIndex++;
+                        setTimeout(tryNextApproach, 2000);
+                    } else {
+                        console.log('❌ All navigation approaches failed');
+                        ErrorHandler.showError('Server redirect detected. Please check server configuration or try refreshing the page.');
+                    }
+                };
+                
+                tryNextApproach();
+            }
+            
+        } catch (error) {
+            console.error('Error starting game:', error);
+            ErrorHandler.showError('Error starting game. Please try again.', document.querySelector('.game-settings'));
+        }
+    }
 }
 
 function initPlayerNamesPage() {
