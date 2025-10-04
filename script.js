@@ -476,24 +476,41 @@ function initIndexPage() {
     const customPlayerCount = document.getElementById('customPlayerCount');
     const imposterCount = document.getElementById('imposterCount');
     const startButton = document.getElementById('startGame');
+    
+    console.log('Initializing index page');
+    console.log('Elements found:', {
+        customPlayerCount: !!customPlayerCount,
+        imposterCount: !!imposterCount,
+        startButton: !!startButton
+    });
+    
+    if (!startButton) {
+        console.error('Start button not found!');
+        ErrorHandler.showError('Start button not found. Please refresh the page.');
+        return;
+    }
 
     // Handle player count input with validation
-    customPlayerCount.addEventListener('input', function() {
-        const value = parseInt(this.value);
-        const isValid = InputValidator.validate(this, [
-            InputValidator.rules.required,
-            InputValidator.rules.range(3, 20)
-        ]);
-        
-        if (isValid) {
-            gameState.playerCount = value;
-            updateImposterMax();
-            AutoSave.save();
-        }
-    });
+    if (customPlayerCount) {
+        customPlayerCount.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            const isValid = InputValidator.validate(this, [
+                InputValidator.rules.required,
+                InputValidator.rules.range(3, 20)
+            ]);
+            
+            if (isValid) {
+                gameState.playerCount = value;
+                updateImposterMax();
+                AutoSave.save();
+            }
+        });
+    }
 
     // Update imposter max based on player count
     function updateImposterMax() {
+        if (!imposterCount) return;
+        
         const maxImposters = Math.floor(gameState.playerCount / 2);
         imposterCount.max = maxImposters;
         if (parseInt(imposterCount.value) > maxImposters) {
@@ -501,30 +518,37 @@ function initIndexPage() {
         }
     }
 
-    imposterCount.addEventListener('input', function() {
-        const value = parseInt(this.value);
-        const maxImposters = Math.floor(gameState.playerCount / 2);
-        const isValid = InputValidator.validate(this, [
-            InputValidator.rules.required,
-            InputValidator.rules.range(1, maxImposters)
-        ]);
-        
-        if (isValid) {
-            gameState.imposterCount = value;
-            AutoSave.save();
-        }
-    });
+    if (imposterCount) {
+        imposterCount.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            const maxImposters = Math.floor(gameState.playerCount / 2);
+            const isValid = InputValidator.validate(this, [
+                InputValidator.rules.required,
+                InputValidator.rules.range(1, maxImposters)
+            ]);
+            
+            if (isValid) {
+                gameState.imposterCount = value;
+                AutoSave.save();
+            }
+        });
+    }
 
     // Start game button
     startButton.addEventListener('click', function() {
+        console.log('Start game button clicked');
+        console.log('Current gameState:', gameState);
+        
         try {
             // Validate input
             if (gameState.playerCount < 3 || gameState.playerCount > 20) {
+                console.log('Invalid player count:', gameState.playerCount);
                 ErrorHandler.showError('Aantal spelers moet tussen 3 en 20 zijn.', document.querySelector('.game-settings'));
                 return;
             }
             
             if (gameState.imposterCount < 1 || gameState.imposterCount > Math.floor(gameState.playerCount / 2)) {
+                console.log('Invalid imposter count:', gameState.imposterCount);
                 ErrorHandler.showError('Aantal imposters moet tussen 1 en de helft van het aantal spelers zijn.', document.querySelector('.game-settings'));
                 return;
             }
@@ -532,23 +556,42 @@ function initIndexPage() {
             // Get imposter knowledge
             const knowledgeSelect = document.getElementById('imposterKnowledge');
             if (!knowledgeSelect) {
+                console.log('Knowledge select not found');
                 ErrorHandler.showError('Imposter knowledge selector not found.', document.querySelector('.game-settings'));
                 return;
             }
             
             gameState.imposterKnowledge = knowledgeSelect.value;
+            console.log('Imposter knowledge set to:', gameState.imposterKnowledge);
             
             // Generate random word for this game
             gameState.gameWord = getRandomWord(gameState.imposterKnowledge);
+            console.log('Generated word:', gameState.gameWord);
             
             // Save game state
+            console.log('Saving game state...');
             if (!ErrorHandler.safeLocalStorage.set('gameState', gameState)) {
+                console.log('Failed to save game state');
                 ErrorHandler.showError('Failed to save game settings.', document.querySelector('.game-settings'));
                 return;
             }
             
-            // Navigate to next page
-            window.location.href = 'player-names.html';
+            console.log('Game state saved successfully');
+            console.log('Navigating to player-names.html...');
+            
+            // Navigate to next page with fallback
+            try {
+                window.location.href = 'player-names.html';
+            } catch (navError) {
+                console.error('Navigation error:', navError);
+                // Fallback navigation methods
+                window.location.assign('player-names.html');
+                setTimeout(() => {
+                    if (window.location.pathname.includes('index')) {
+                        window.location.replace('player-names.html');
+                    }
+                }, 100);
+            }
             
         } catch (error) {
             console.error('Error starting game:', error);
