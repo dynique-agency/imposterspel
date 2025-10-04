@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speler Namen - Imposter Spel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <h1>Imposter Spel</h1>
+                <div class="loading-subtitle">Loading...</div>
+            </div>
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text">Initialiseren...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Speler Namen</h1>
+        
+        <!-- Progress indicator -->
+        <div class="progress-indicator">
+            <div class="progress-step completed">
+                <div class="step-number">✓</div>
+                <div class="step-label">Instellingen</div>
+            </div>
+            <div class="progress-step active">
+                <div class="step-number">2</div>
+                <div class="step-label">Spelers</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-number">3</div>
+                <div class="step-label">Rollen</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-number">4</div>
+                <div class="step-label">Spelen</div>
+            </div>
+        </div>
+        
+        <!-- Back button -->
+        <div class="navigation-buttons">
+            <button class="back-button" onclick="goBack()">← Terug</button>
+        </div>
+        
+        <div class="player-names-form">
+            <div id="playerInputs"></div>
+            <button id="startGameWithNames" class="start-button" disabled>Start Spel</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

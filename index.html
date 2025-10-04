@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imposter Spel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <h1>Imposter Spel</h1>
+                <div class="loading-subtitle">Loading...</div>
+            </div>
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text">Initialiseren...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Imposter Spel</h1>
+        
+        <!-- Progress indicator -->
+        <div class="progress-indicator">
+            <div class="progress-step active">
+                <div class="step-number">1</div>
+                <div class="step-label">Instellingen</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-number">2</div>
+                <div class="step-label">Spelers</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-number">3</div>
+                <div class="step-label">Rollen</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-number">4</div>
+                <div class="step-label">Spelen</div>
+            </div>
+        </div>
+        
+        <!-- Help section -->
+        <div class="help-section">
+            <button class="help-toggle" onclick="toggleHelp()">❓ Help</button>
+            <div id="help-content" class="help-content hidden">
+                <h3>Hoe werkt het Imposter Spel?</h3>
+                <ul>
+                    <li><strong>Aantal spelers:</strong> Kies tussen 3-20 spelers</li>
+                    <li><strong>Imposters:</strong> Maximaal de helft van het aantal spelers</li>
+                    <li><strong>Kennisniveau:</strong> Wat weten de imposters over het woord?</li>
+                    <li><strong>Doel:</strong> Crewmates vinden het woord, imposters proberen te verwarren</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="game-settings">
+            <div class="setting-group">
+                <label for="customPlayerCount">Aantal spelers:</label>
+                <input type="number" id="customPlayerCount" min="3" max="20" value="5" placeholder="3-20">
+            </div>
+            
+            <div class="setting-group">
+                <label for="imposterCount">Aantal imposters:</label>
+                <input type="number" id="imposterCount" min="1" max="2" value="1">
+                <small>Maximaal de helft van het aantal spelers</small>
+            </div>
+            
+            <div class="setting-group">
+                <label for="imposterKnowledge">Wat weten de imposters?</label>
+                <select id="imposterKnowledge">
+                    <option value="nothing">Niets</option>
+                    <option value="little">Heel klein beetje</option>
+                    <option value="some">Een beetje</option>
+                </select>
+            </div>
+            
+            <button id="startGame" class="start-button">Start Spel</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
